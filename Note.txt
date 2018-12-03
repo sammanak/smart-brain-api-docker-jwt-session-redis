@@ -1,0 +1,165 @@
+PostgreSQL Configure => Browser Command: pgAdmin 4 Configuration/Runtime
+
+
+Windows 7 => Install Docker Toolbox 
+Run Docker `Quick Start Terminal`
+
+$ docker-machine start default # Start default docker machine 
+
+$ touch Dockerfile
+Goto Docker Hub to see `Docker Node` Detail
+$ node -v
+$ npm start # to make sure appp is running properly 
+--------- Dockerfile ----------
+FROM node:carbon
+
+CMD ["/bin/bash"]
+--------- /Dockerfile ----------
+$ docker build -t superawesomecontainer .
+Sending build context to Docker daemon  18.98MB
+...........................
+
+$ docker run -it superawesomecontainer
+root@8d0acfcbf81f:/# node -v
+v8.12.0
+
+--------- Dockerfile ----------
+FROM node:10.10.0
+
+CMD ["/bin/bash"]
+--------- /Dockerfile ----------
+$ docker build -t superawesomecontainer .
+$ docker run -it superawesomecontainer
+root@1b593898a362:/# node -v
+v10.10.0
+
+$ docker run -it -d superawesomecontainer
+e957097dcff682fad003b561d139795b2b2937f6609debf8216ad86cba53da58
+
+$ docker ps
+CONTAINER ID        IMAGE                   COMMAND             CREATED             STATUS              PORTS               NAMES
+e957097dcff6        superawesomecontainer   "/bin/bash"         2 seconds ago       Up 1 second                             optimistic_visvesvaraya
+
+LEARN@LEARN-PC MINGW64 /d/p/React/project-before-deploy-to-heroku/smart-brain-api
+$ docker exec -it e957097dcff6 bash
+root@e957097dcff6:/# exit
+exit
+
+$ docker stop e957097dcff6
+e957097dcff6
+
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+--------- Dockerfile ----------
+FROM node:10.10.0
+
+WORKDIR /usr/src/smart-brain-api
+
+COPY ./ ./ # Copy everything
+# COPY package.json ./ #Copy only package.json to container
+
+RUN npm install
+
+CMD ["/bin/bash"]
+--------- /Dockerfile ----------
+
+$ docker build -t superawesomecontainer .
+Now We have our files on docker container (virtual server) 
+
+$ docker run -it superawesomecontainer
+
+root@989ef094b668:/usr/src/smart-brain-api# ls
+controllers  Dockerfile  Git  node_modules  Note.txt  package.json  package-lock.json  README.md  server.js  server_backup.js
+
+root@989ef094b668:/usr/src/smart-brain-api# npm start -> Will Get Error with PORTS
+root@989ef094b668:/usr/src/smart-brain-api# exit
+
+Run App on port 3001 on container
+$ docker run -it -p 3000:3000 superawesomecontainer
+
+------- docker-compose.yml ------------
+version: '3.6'
+
+services: 
+  smart-brain-api: 
+    container_name: backend
+    # image: node: :10.10.0
+    build: ./
+    command: npm start
+    working_dir: /usr/src/smart-brain-ap
+    ports: 
+      - "3001:3001"
+    volumes: 
+      - ./:/usr/src/smart-brain-api
+------- /docker-compose.yml ------------
+
+$ docker-compose build
+Building smart-brain-api
+Step 1/5 : FROM node:10.10.0
+ ---> d0d12094f6ab
+ ................
+
+$ docker-compose run smart-brain-api
+
+................
+[nodemon] starting `node server.js`
+running!
+app is running on port 3000
+................
+
+IF [ERROR: Cannot create container for service smart-brain-api:...]
+# List all docker container 
+$ docker ps -a
+
+Remove docker container have name smart-brain-api
+$ docker rm $(docker ps -aq --filter name=smart-brain-api)
+
+or 
+
+Step 1:(it lists docker container with its name)
+$ docker ps -a
+Step 2:
+$ docker rm name_of_the_docker_container
+
+$ docker-compose build
+$ docker-compose run smart-brain-api
+................
+[nodemon] starting `node server.js`
+running!
+app is running on port 3000
+................
+
+localhost:3001 # Fail => Becasue Windows is not fully support Docker  
+Note: Mac OS or Windows 8 or 10 will be ok
+
+$ docker-compose down # Removing network smartbrainapi_default
+# WARNING: Network smartbrainapi_default not found
+
+$ docker-compose up --build # Building our Backend It run `container_name: backend` and run `working_dir: /usr/src/smart-brain-api` # Creating network "smartbrainapidocker_default" with the default driver
+Building smart-brain-api
+
+If Error package.json not found because of permission.
+
+========================================================================
+
+$ docker-compose down
+Removing backend ... done
+Removing network smart-brain-api_default
+
+$ docker-compose up -d
+Creating network "smart-brain-api_default" with the default driver
+Creating backend ... done
+
+$ docker-compose exec smart-brain-api bash
+root@4a406f459709:/usr/src/smart-brain-api# npm run start
+
+docker-compose.yml => Add below code 
+# PostgreSQL
+  postgres:
+    # container_name: postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+
+
